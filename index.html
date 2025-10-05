@@ -105,14 +105,20 @@
         .posts {
             display: flex;
             flex-direction: column;
-            gap: 48px;
+            gap: 0;
         }
 
         .post {
             cursor: pointer;
+            padding: 48px 0;
+            border-bottom: 1px solid var(--border);
             transition: transform 0.2s ease;
             animation: fadeIn 0.8s ease;
             animation-fill-mode: both;
+        }
+
+        .post:last-child {
+            border-bottom: none;
         }
 
         .post:hover {
@@ -129,9 +135,16 @@
         .post-title {
             font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             color: var(--text);
             letter-spacing: -0.02em;
+        }
+
+        .post-excerpt {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-top: 12px;
+            font-size: 0.95rem;
         }
 
         .post-categories {
@@ -248,6 +261,49 @@
             color: var(--text-secondary);
         }
 
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Charter', 'Georgia', serif;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--card-bg);
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -318,6 +374,7 @@
         <main id="postsSection">
             <div id="categoryFilter" class="category-filter" style="display: none;"></div>
             <div id="postsList" class="posts"></div>
+            <div id="pagination" class="pagination" style="display: none;"></div>
             <div id="postContent" class="post-content"></div>
         </main>
 
@@ -335,6 +392,8 @@
         let allCategories = new Set();
         let selectedCategory = 'all';
         let currentView = 'list';
+        let currentPage = 1;
+        const postsPerPage = 10;
 
         window.onload = function() {
             if (localStorage.getItem('theme') === 'dark') {
@@ -377,7 +436,8 @@
                             date: frontMatter.date || '',
                             categories: frontMatter.categories || [],
                             published: frontMatter.published !== 'false' && frontMatter.published !== false,
-                            content: content
+                            content: content,
+                            excerpt: getExcerpt(content)
                         };
                     } catch (e) {
                         return {
@@ -386,7 +446,8 @@
                             date: '',
                             categories: [],
                             published: true,
-                            content: ''
+                            content: '',
+                            excerpt: ''
                         };
                     }
                 }));
@@ -439,6 +500,23 @@
             return { frontMatter: {}, content };
         }
 
+        function getExcerpt(content) {
+            const { content: bodyContent } = parseFrontMatter(content);
+            // 마크다운 제거하고 순수 텍스트만
+            const plainText = bodyContent
+                .replace(/^---[\s\S]*?---/m, '') // Front matter 제거
+                .replace(/#{1,6}\s+/g, '') // 헤딩 제거
+                .replace(/\*\*(.+?)\*\*/g, '$1') // 볼드 제거
+                .replace(/\*(.+?)\*/g, '$1') // 이탤릭 제거
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // 링크 제거
+                .replace(/`([^`]+)`/g, '$1') // 인라인 코드 제거
+                .replace(/```[\s\S]*?```/g, '') // 코드 블록 제거
+                .trim();
+            
+            // 처음 150자
+            return plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
+        }
+
         function displayCategoryFilter() {
             if (allCategories.size === 0) return;
 
@@ -455,6 +533,7 @@
 
         function filterByCategory(category) {
             selectedCategory = category;
+            currentPage = 1; // 카테고리 변경 시 첫 페이지로
             
             // 버튼 active 상태 업데이트
             document.querySelectorAll('.category-filter-btn').forEach(btn => {
@@ -470,6 +549,7 @@
 
         function displayPosts() {
             const container = document.getElementById('postsList');
+            const paginationContainer = document.getElementById('pagination');
             
             // 카테고리 필터링
             const filteredPosts = selectedCategory === 'all' 
@@ -478,10 +558,18 @@
 
             if (filteredPosts.length === 0) {
                 container.innerHTML = '<p class="loading">해당 카테고리의 글이 없습니다.</p>';
+                paginationContainer.style.display = 'none';
                 return;
             }
 
-            container.innerHTML = filteredPosts.map((post, index) => `
+            // 페이지네이션 계산
+            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+            const startIndex = (currentPage - 1) * postsPerPage;
+            const endIndex = startIndex + postsPerPage;
+            const currentPosts = filteredPosts.slice(startIndex, endIndex);
+
+            // 포스트 렌더링
+            container.innerHTML = currentPosts.map((post, index) => `
                 <article class="post" onclick="showPost('${post.name}')" style="animation-delay: ${index * 0.1}s">
                     <div class="post-date">${post.date || formatDate(post.name)}</div>
                     <h2 class="post-title">${post.title}</h2>
@@ -490,10 +578,59 @@
                             ${post.categories.map(cat => `<span class="category-badge">${cat}</span>`).join('')}
                         </div>
                     ` : ''}
+                    ${post.excerpt ? `<p class="post-excerpt">${post.excerpt}</p>` : ''}
                 </article>
             `).join('');
 
+            // 페이지네이션 렌더링
+            if (totalPages > 1) {
+                paginationContainer.style.display = 'flex';
+                renderPagination(totalPages);
+            } else {
+                paginationContainer.style.display = 'none';
+            }
+
             currentView = 'list';
+            window.scrollTo(0, 0);
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination');
+            let html = '';
+
+            // 이전 버튼
+            html += `<button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ 이전</button>`;
+
+            // 페이지 번호
+            for (let i = 1; i <= totalPages; i++) {
+                if (
+                    i === 1 || // 첫 페이지
+                    i === totalPages || // 마지막 페이지
+                    (i >= currentPage - 1 && i <= currentPage + 1) // 현재 페이지 근처
+                ) {
+                    html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span class="pagination-info">...</span>`;
+                }
+            }
+
+            // 다음 버튼
+            html += `<button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음 ›</button>`;
+
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const filteredPosts = selectedCategory === 'all' 
+                ? posts 
+                : posts.filter(post => post.categories.includes(selectedCategory));
+            
+            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+            
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            displayPosts();
         }
 
         function formatDate(filename) {
@@ -529,6 +666,7 @@
         function backToList() {
             document.getElementById('postsList').style.display = 'flex';
             document.getElementById('categoryFilter').style.display = allCategories.size > 0 ? 'flex' : 'none';
+            document.getElementById('pagination').style.display = 'flex';
             document.getElementById('postContent').classList.remove('active');
             currentView = 'list';
             window.scrollTo(0, 0);
