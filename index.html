@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Name - Blog</title>
+    <title>WKim - Blog</title>
     <style>
         * {
             margin: 0;
@@ -12,16 +12,16 @@
         }
 
         :root {
-            --bg: #fafafa;
-            --text: #1a1a1a;
-            --text-secondary: #666;
+            --bg: #e8dcc8;
+            --text: #3a3632;
+            --text-secondary: #6b6662;
             --accent: #2563eb;
-            --border: #e5e5e5;
-            --card-bg: #ffffff;
+            --border: #d4c4b0;
+            --card-bg: #f5f0e8;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            font-family: 'Charter', 'Georgia', 'Iowan Old Style', 'Apple Garamond', 'Baskerville', 'Times New Roman', serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
@@ -173,12 +173,12 @@
         }
 
         body.dark {
-            --bg: #0a0a0a;
-            --text: #e5e5e5;
-            --text-secondary: #a3a3a3;
-            --accent: #60a5fa;
-            --border: #262626;
-            --card-bg: #141414;
+            --bg: #2f2f2f;
+            --text: #ebe3d5;
+            --text-secondary: #b8b0a0;
+            --accent: #d4906f;
+            --border: #4a4a4a;
+            --card-bg: #3a3a3a;
         }
 
         .post-content {
@@ -304,9 +304,9 @@
 
     <div class="container">
         <header>
-            <h1>Your Name</h1>
+            <h1>Woohyeok-Kim</h1>
             <p class="bio">
-                생각을 글로 옮기는 사람. 기술, 디자인, 그리고 삶에 대해 씁니다.
+                welcome to my little world.
             </p>
             <div class="social-links">
                 <a href="#">Twitter</a>
@@ -322,7 +322,7 @@
         </main>
 
         <footer>
-            © 2025 Your Name. All rights reserved.
+            © 2025 Woohyeok-Kim. All rights reserved.
         </footer>
     </div>
 
@@ -385,10 +385,14 @@
                             title: file.name.replace('.md', ''),
                             date: '',
                             categories: [],
+                            published: true,
                             content: ''
                         };
                     }
                 }));
+
+                // 공개된 글만 필터링
+                posts = posts.filter(post => post.published);
 
                 // 날짜순 정렬 (최신순)
                 posts.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
