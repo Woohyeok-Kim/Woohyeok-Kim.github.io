@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #fafafa;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --accent: #2563eb;
+            --border: #e5e5e5;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        header {
+            margin-bottom: 80px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.03em;
+        }
+
+        .bio {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--accent);
+        }
+
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .category-filter-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .category-filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .posts {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        .post {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            animation: fadeIn 0.8s ease;
+            animation-fill-mode: both;
+        }
+
+        .post:hover {
+            transform: translateX(4px);
+        }
+
+        .post-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .post-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .post-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .category-badge {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        body.dark {
+            --bg: #0a0a0a;
+            --text: #e5e5e5;
+            --text-secondary: #a3a3a3;
+            --accent: #60a5fa;
+            --border: #262626;
+            --card-bg: #141414;
+        }
+
+        .post-content {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            margin-top: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .post-content.active {
+            display: block;
+        }
+
+        .post-content h1,
+        .post-content h2,
+        .post-content h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .post-content p {
+            margin-bottom: 1em;
+        }
+
+        .post-content ul,
+        .post-content ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .post-content code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .post-content pre {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1em;
+        }
+
+        .back-button {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .back-button:hover {
+            color: var(--accent);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            margin-top: 120px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            animation: fadeIn 0.8s ease 0.5s both;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 60px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .theme-toggle {
+                top: 20px;
+                right: 20px;
+            }
+
+            .post-content {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <div class="container">
+        <header>
+            <h1>Your Name</h1>
+            <p class="bio">
+                생각을 글로 옮기는 사람. 기술, 디자인, 그리고 삶에 대해 씁니다.
+            </p>
+            <div class="social-links">
+                <a href="#">Twitter</a>
+                <a href="#">GitHub</a>
+                <a href="#">Email</a>
+            </div>
+        </header>
+
+        <main id="postsSection">
+            <div id="categoryFilter" class="category-filter" style="display: none;"></div>
+            <div id="postsList" class="posts"></div>
+            <div id="postContent" class="post-content"></div>
+        </main>
+
+        <footer>
+            © 2025 Your Name. All rights reserved.
+        </footer>
+    </div>
+
+    <script>
+        // ⭐ 여기에 본인의 GitHub 정보를 입력하세요
+        const GITHUB_USERNAME = 'Woohyeok-Kim';
+        const GITHUB_REPO = 'myBlog';
+
+        let posts = [];
+        let allCategories = new Set();
+        let selectedCategory = 'all';
+        let currentView = 'list';
+
+        window.onload = function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+            loadPosts();
+        };
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        async function loadPosts() {
+            try {
+                const response = await fetch(
+                    `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents`
+                );
+
+                if (!response.ok) throw new Error('블로그를 불러올 수 없습니다');
+
+                const files = await response.json();
+                const mdFiles = files.filter(file => file.name.endsWith('.md'));
+
+                // 각 파일의 메타데이터 파싱
+                posts = await Promise.all(mdFiles.map(async file => {
+                    try {
+                        const contentResponse = await fetch(file.download_url);
+                        const content = await contentResponse.text();
+                        const { frontMatter } = parseFrontMatter(content);
+                        
+                        // 카테고리 수집
+                        if (frontMatter.categories) {
+                            frontMatter.categories.forEach(cat => allCategories.add(cat));
+                        }
+                        
+                        return {
+                            ...file,
+                            title: frontMatter.title || file.name.replace('.md', ''),
+                            date: frontMatter.date || '',
+                            categories: frontMatter.categories || [],
+                            content: content
+                        };
+                    } catch (e) {
+                        return {
+                            ...file,
+                            title: file.name.replace('.md', ''),
+                            date: '',
+                            categories: [],
+                            content: ''
+                        };
+                    }
+                }));
+
+                // 날짜순 정렬 (최신순)
+                posts.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+                displayCategoryFilter();
+                displayPosts();
+
+            } catch (error) {
+                document.getElementById('postsList').innerHTML = 
+                    '<p class="loading">블로그를 불러올 수 없습니다.</p>';
+            }
+        }
+
+        function parseFrontMatter(content) {
+            const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+            const match = content.match(frontMatterRegex);
+            
+            if (match) {
+                const frontMatter = {};
+                const lines = match[1].split('\n');
+                
+                lines.forEach(line => {
+                    const [key, ...valueParts] = line.split(':');
+                    if (key && valueParts.length) {
+                        const value = valueParts.join(':').trim();
+                        if (key.trim() === 'categories') {
+                            frontMatter.categories = value
+                                .replace(/[\[\]]/g, '')
+                                .split(',')
+                                .map(c => c.trim())
+                                .filter(c => c);
+                        } else {
+                            frontMatter[key.trim()] = value;
+                        }
+                    }
+                });
+                
+                return {
+                    frontMatter,
+                    content: match[2]
+                };
+            }
+            
+            return { frontMatter: {}, content };
+        }
+
+        function displayCategoryFilter() {
+            if (allCategories.size === 0) return;
+
+            const filterContainer = document.getElementById('categoryFilter');
+            filterContainer.style.display = 'flex';
+
+            let html = '<button class="category-filter-btn active" onclick="filterByCategory(\'all\')">전체</button>';
+            allCategories.forEach(cat => {
+                html += `<button class="category-filter-btn" onclick="filterByCategory('${cat}')">${cat}</button>`;
+            });
+
+            filterContainer.innerHTML = html;
+        }
+
+        function filterByCategory(category) {
+            selectedCategory = category;
+            
+            // 버튼 active 상태 업데이트
+            document.querySelectorAll('.category-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((category === 'all' && btn.textContent === '전체') || 
+                    btn.textContent === category) {
+                    btn.classList.add('active');
+                }
+            });
+
+            displayPosts();
+        }
+
+        function displayPosts() {
+            const container = document.getElementById('postsList');
+            
+            // 카테고리 필터링
+            const filteredPosts = selectedCategory === 'all' 
+                ? posts 
+                : posts.filter(post => post.categories.includes(selectedCategory));
+
+            if (filteredPosts.length === 0) {
+                container.innerHTML = '<p class="loading">해당 카테고리의 글이 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredPosts.map((post, index) => `
+                <article class="post" onclick="showPost('${post.name}')" style="animation-delay: ${index * 0.1}s">
+                    <div class="post-date">${post.date || formatDate(post.name)}</div>
+                    <h2 class="post-title">${post.title}</h2>
+                    ${post.categories.length > 0 ? `
+                        <div class="post-categories">
+                            ${post.categories.map(cat => `<span class="category-badge">${cat}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </article>
+            `).join('');
+
+            currentView = 'list';
+        }
+
+        function formatDate(filename) {
+            const dateMatch = filename.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (dateMatch) {
+                return `${dateMatch[1]}년 ${dateMatch[2]}월 ${dateMatch[3]}일`;
+            }
+            return '';
+        }
+
+        function showPost(filename) {
+            const post = posts.find(p => p.name === filename);
+            if (!post) return;
+
+            const { content: bodyContent } = parseFrontMatter(post.content);
+
+            const postsList = document.getElementById('postsList');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const postContent = document.getElementById('postContent');
+
+            postsList.style.display = 'none';
+            categoryFilter.style.display = 'none';
+            postContent.innerHTML = `
+                <a class="back-button" onclick="backToList()">← 목록으로</a>
+                ${parseMarkdown(bodyContent.trim())}
+            `;
+            postContent.classList.add('active');
+            currentView = 'post';
+
+            window.scrollTo(0, 0);
+        }
+
+        function backToList() {
+            document.getElementById('postsList').style.display = 'flex';
+            document.getElementById('categoryFilter').style.display = allCategories.size > 0 ? 'flex' : 'none';
+            document.getElementById('postContent').classList.remove('active');
+            currentView = 'list';
+            window.scrollTo(0, 0);
+        }
+
+        function parseMarkdown(md) {
+            let html = md;
+            
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            html = html.split('\n\n').map(p => {
+                if (p.trim() && !p.startsWith('<')) {
+                    return '<p>' + p + '</p>';
+                }
+                return p;
+            }).join('\n');
+            
+            return html;
+        }
+    </script>
+</body>
+</html>
