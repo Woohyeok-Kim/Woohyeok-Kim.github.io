@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WKim - Blog</title>
+    <title>Your Name - Blog</title>
     <style>
         * {
             margin: 0;
@@ -304,9 +304,9 @@
 
     <div class="container">
         <header>
-            <h1>Woohyeok-Kim</h1>
+            <h1>Your Name</h1>
             <p class="bio">
-                welcome to my little world.
+                생각을 글로 옮기는 사람. 기술, 디자인, 그리고 삶에 대해 씁니다.
             </p>
             <div class="social-links">
                 <a href="#">Twitter</a>
@@ -322,7 +322,7 @@
         </main>
 
         <footer>
-            © 2025 Woohyeok-Kim. All rights reserved.
+            © 2025 Your Name. All rights reserved.
         </footer>
     </div>
 
@@ -376,6 +376,7 @@
                             title: frontMatter.title || file.name.replace('.md', ''),
                             date: frontMatter.date || '',
                             categories: frontMatter.categories || [],
+                            published: frontMatter.published !== 'false' && frontMatter.published !== false,
                             content: content
                         };
                     } catch (e) {
